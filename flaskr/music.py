@@ -1,21 +1,15 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for,  render_template_string
-)
-from werkzeug.exceptions import abort
+    Blueprint, render_template, request, url_for)
+from flaskr.db import get_db
 import pandas as pd
 
-
-from flaskr.db import get_db
-
 bp = Blueprint('music', __name__)
-
 
 @bp.route('/')
 def urls():
     return f'''
         <html>
     <body>
-
     <h2>ДЗ 3. Flask, SQLite</h2>
     <p>1. Вью функция должна выводить количество уникальных исполнителей (artist) из таблицы tracks.
     PATH: /names/</p>
@@ -45,6 +39,7 @@ def names():
     ).fetchall()
     return f'Количество уникальных исполнителей (artist):&nbsp;{posts}'
 
+
 @bp.route('/tracks/')
 def tracks():
     db = get_db()
@@ -57,7 +52,7 @@ def tracks():
 @bp.route('/tracks/genre/', methods=['GET', 'POST'])
 def tracks_genre():
     if request.method == 'POST':
-        pass
+        return "post"
     else:
 
         db = get_db()
@@ -73,51 +68,23 @@ def tracks_genre():
             list_genre_new.append(i)
 
         return render_template('list_genre.html', option=list_genre_new)
-#         return render_template_string('''
-# <html>
-#         <form>
-#             <p><input type="search" list="character">
-#             <datalist id="character">
-#                 <select name="genre" method="GET">
-#                   {% for opt in option %}
-#                     <option value="{{ opt }}"> SELECTED>{{opt}}</option>
-#                   {% endfor %}
-#                 </select>
-#
-#
-#             </datalist>
-#             <input type="button" value="Кнопка" onClick='location.href="/new/"'>
-#         </form>
-#
-# </html>
-#
-# ''', option=list_genre)
-
 
 
 @bp.route('/tracks/genre/result/', methods=['GET', 'POST'])
 def result():
-
     if request.method == 'POST':
-        print(request.form.get('genre_input'))
         genre_input=request.form.get('genre_input')
         db = get_db()
         quant_genre = db.execute(
             f"""SELECT COUNT(*) FROM tracks WHERE genre='{genre_input}';"""
         ).fetchall()
-        print(quant_genre)
-
+        return f'{genre_input}={quant_genre}'
     else:
-        pass
-    return f'{genre_input}={quant_genre}'
-
-
-
+        return 'GET'
 
 
 @bp.route('/tracks-sec/', methods=['GET', 'POST'])
 def tracks_sec():
-
     if request.method == 'GET':
         db = get_db()
         df = pd.read_sql("select lenght,title from tracks", db)
@@ -128,20 +95,16 @@ def tracks_sec():
 
 @bp.route('/tracks-sec/statistics/', methods=['GET', 'POST'])
 def tracks_sec_statistics():
-
     if request.method == 'GET':
         db = get_db()
         len_tracks = db.execute(
             "SELECT SUM(lenght) FROM  tracks"
         ).fetchall()
         len_tracks=[int((str(i)).replace(',', '').replace('(','').replace(')','')) for i in len_tracks]
-        print(len_tracks)
         avg_tracks =db.execute(
             "SELECT AVG(lenght) FROM  tracks"
         ).fetchall()
         avg_tracks=[float((str(i)).replace(',', '').replace('(','').replace(')','')) for i in avg_tracks]
-        print(avg_tracks)
-        # maxx = len(max_list)
         return f'''
         <p>Средняя продолжительность трека: {avg_tracks}</p>
         <p>Общая продолжительность всех треков в секундах: {len_tracks}</p>
