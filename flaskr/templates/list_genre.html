@@ -1,0 +1,11 @@
+<form id="form__do_hash" method="post" action="/tracks/genre/result/">
+  <p>Выберите название жанра трека:</p>
+  <p><input type="search" list="character" name="genre_input">
+    <datalist id="character">
+    {% for opt in option %}
+      <option value="{{ opt }}"></option>
+    {% endfor %}
+    </datalist>
+    <input type="submit" value="Искать">
+  </p>
+</form>
